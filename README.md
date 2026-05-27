@@ -1,4 +1,4 @@
-# 月影回廊
+# 重生之我该如何选择
 
 一个类似 `oliversgame.streamlit.app` 的中文互动剧情游戏。界面使用 Streamlit，剧情生成优先调用 DeepSeek API；没有 API Key 时会自动使用内置离线剧情引擎，方便先试玩和改规则。
 
@@ -27,7 +27,7 @@ streamlit run app.py
 cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 ```
 
-然后编辑 `.streamlit/secrets.toml` 填入 `DEEPSEEK_API_KEY`。
+然后编辑 `.streamlit/secrets.toml` 填入 `DEEPSEEK_API_KEY`。部署到 Streamlit Cloud 后，其他玩家打开网页时会使用你的服务端 API key 调用 DeepSeek，但他们看不到 key。
 
 ## 部署到 Streamlit Community Cloud
 
@@ -49,9 +49,28 @@ DEEPSEEK_MODEL = "deepseek-chat"
 
 可以继续修改代码。每次把修改提交并推送到 GitHub 后，Streamlit Cloud 会自动重新部署。DeepSeek key 不需要重新写进代码，只在 Streamlit 的 Secrets 页面维护。
 
+代码查看和修改位置：
+
+- GitHub 仓库：`https://github.com/wai871077-Liu/ai-story-game`
+- 本地目录：`/Users/shuangshuang/Desktop/game/ai_story_game`
+- 主要代码：`app.py`
+
+修改后同步部署：
+
+```bash
+git add .
+git commit -m "Update story game"
+git push
+```
+
+Streamlit Cloud 会从 GitHub 自动更新。如果没有自动更新，可以在 Streamlit Cloud app 页面手动点击 Reboot 或 Rerun。
+
+普通玩家访问游戏页面时不会看到 GitHub 仓库链接。GitHub 是否公开只影响别人能不能从 GitHub 搜到代码；如果想隐藏源码，需要把仓库改为 Private，并确认 Streamlit Cloud 仍有访问权限。
+
 ## 玩法
 
 - 在底部输入“公子”的行动或台词。
 - 点击发送，系统推进一段剧情。
-- 可以自动推进剧情、保存/唤醒记忆、查看角色背景、切换主题。
+- 可以自动推进剧情、封存/唤醒记忆、查看角色背景、切换高中校园/公司办公室/别墅背景。
+- 外观支持深色和浅色。
 - 选择不同语气会影响 AI 生成方向。
