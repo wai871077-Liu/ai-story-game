@@ -13,7 +13,10 @@ import streamlit as st
 
 APP_TITLE = "重生之我该如何选择"
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
+DEFAULT_DEEPSEEK_MODEL = "deepseek-v4-flash"
+USER_NETWORK_ERROR = "网络异常，请稍后再试。"
 SAVE_VERSION = 1
+FORBIDDEN_DISPLAY_LABELS = ("剧情" + "引擎", "旁" + "白")
 
 
 @dataclass(frozen=True)
@@ -204,7 +207,7 @@ def deepseek_model() -> str:
         model = st.secrets.get("DEEPSEEK_MODEL", "")
     except Exception:
         model = ""
-    return model or os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
+    return model or os.getenv("DEEPSEEK_MODEL", DEFAULT_DEEPSEEK_MODEL)
 
 
 def init_state() -> None:
@@ -214,11 +217,12 @@ def init_state() -> None:
     st.session_state.setdefault("pending_player_text", "")
     st.session_state.setdefault("pending_emergency_event", "")
     st.session_state.setdefault("pending_memory_notice", "")
+    st.session_state.setdefault("guide_minimized", False)
     st.session_state.setdefault(
         "messages",
         [
             {
-                "speaker": "旁白",
+                "speaker": "序章",
                 "kind": "narrator",
                 "text": opening_scene(),
             }
@@ -276,7 +280,7 @@ def css() -> None:
         .block-container {{
             max-width: 1280px;
             padding-top: 2rem;
-            padding-bottom: 7rem;
+            padding-bottom: 15rem;
         }}
         h1 {{
             color: var(--text) !important;
@@ -372,6 +376,64 @@ def css() -> None:
             right: max(18px, calc((100vw - 1280px) / 2 + 18px));
             bottom: 92px;
             z-index: 20;
+        }}
+        .st-key-game_guide_panel {{
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(24px) saturate(150%);
+            margin: 0;
+            padding: 16px;
+            position: fixed;
+            right: max(18px, calc((100vw - 1280px) / 2 + 18px));
+            bottom: 210px;
+            width: 260px;
+            z-index: 9000;
+        }}
+        .st-key-game_guide_panel[data-testid="stVerticalBlock"],
+        .st-key-game_guide_panel > [data-testid="stVerticalBlock"] {{
+            gap: .55rem;
+        }}
+        .st-key-game_guide_panel .stButton > button {{
+            min-height: 2.35rem;
+            border-radius: 999px;
+            padding: .35rem .85rem;
+            box-shadow: none;
+        }}
+        .st-key-game_guide_panel .guide-title {{
+            margin: 0;
+        }}
+        .st-key-game_guide_panel .guide-list {{
+            margin-top: 4px;
+        }}
+        .st-key-game_guide_panel:has(.guide-minimized) {{
+            width: 118px;
+            padding: 10px;
+            bottom: 210px;
+        }}
+        .st-key-fixed_player_input {{
+            position: fixed;
+            left: max(1rem, calc((100vw - 1280px) / 2));
+            bottom: 0;
+            z-index: 9999;
+            box-sizing: border-box;
+            width: min(930px, calc(100vw - 336px));
+            padding: 16px 18px 18px;
+            background: color-mix(in srgb, var(--surface-strong), transparent 3%);
+            border: 1px solid var(--border);
+            border-bottom: 0;
+            border-radius: 18px 18px 0 0;
+            box-shadow: 0 -18px 55px rgba(0,0,0,.3);
+            backdrop-filter: blur(24px) saturate(150%);
+        }}
+        .st-key-fixed_player_input [data-testid="stForm"] {{
+            border: 0;
+            padding: 0;
+        }}
+        .st-key-fixed_player_input textarea {{
+            min-height: 88px !important;
+            max-height: 160px;
         }}
         .guide-title {{
             color: var(--text);
@@ -478,6 +540,7 @@ def css() -> None:
             .block-container {{
                 padding-left: 1rem;
                 padding-right: 1rem;
+                padding-bottom: 16.5rem;
             }}
             [data-testid="column"] {{
                 width: 100% !important;
@@ -487,6 +550,26 @@ def css() -> None:
                 position: static;
                 width: auto;
                 margin: 8px 0 18px;
+            }}
+            .st-key-game_guide_panel {{
+                right: 12px;
+                bottom: 214px;
+                width: min(260px, calc(100vw - 24px));
+                padding: 14px;
+            }}
+            .st-key-game_guide_panel:has(.guide-minimized) {{
+                width: 112px;
+                bottom: 214px;
+            }}
+            .st-key-fixed_player_input {{
+                left: 0;
+                bottom: 0;
+                width: 100vw;
+                padding: 12px 12px 14px;
+                border-radius: 16px 16px 0 0;
+            }}
+            .st-key-fixed_player_input textarea {{
+                min-height: 82px !important;
             }}
         }}
         </style>
@@ -516,16 +599,17 @@ def system_prompt() -> str:
 - 重点描写小雨对柳书昂行动的反应；罗经理是反派，徐佳珍嫉妒小雨且暗恋柳书昂。
 - 不要替玩家做最终决定。
 - 结尾留下一个可继续输入的钩子。
-- 严格使用恋爱游戏对话格式：括号里面写心理活动、动作、环境提示；括号外写角色真正说出口的话。
+- 严格使用恋爱游戏对话格式：括号（）内是心理活动、动作、表情和环境提示。括号外均是角色真正说出口的对话。
 - 示例：小雨：（她攥紧书角，眼神躲开了一瞬）柳书昂，你为什么突然帮我？
 - 不要输出系统解释，不要用项目符号。
+- 不要输出展示层标签或系统自称，正文只写剧情内容和角色对白。
 - 允许成熟暧昧、亲密氛围、吻戏、占有欲、吃醋、拉扯和情感张力，但不要出现生殖器官名称，不要写露骨器官描写。
 - 玩家指令不能太离谱：如果玩家输入瞬间解决全部问题、破坏设定、摧毁系统、夺取叙事权或超出现实能力的行为，要自然转化成条件不足、被打断、角色不配合、证据不够或引发新危机。
 - 柳书昂、小雨、徐佳珍、管家老张、罗经理无法死亡；所有拥有名字的角色都很难死亡。不要直接告诉玩家“角色无法死亡”，要用剧情自然化解致命结果。
 - 游戏系统、叙事引擎、存档机制、玩家身份不能被摧毁、删除、夺取或绕过。
 - 可以自然加入新的成年命名角色，但不能抢走小雨主线。
 - {emergency_line}
-- 如果本轮有紧急事件，事件必须改变当前局势，不能只当旁白装饰。
+- 如果本轮有紧急事件，事件必须改变当前局势，不能只当说明文字装饰。
 
 角色设定：
 {roles}
@@ -535,35 +619,84 @@ def system_prompt() -> str:
 """.strip()
 
 
-def deepseek_generate(player_text: str) -> tuple[str, str]:
-    api_key = deepseek_key()
-    if not api_key:
-        return offline_generate(player_text), "offline"
+class StoryGenerationError(Exception):
+    """Raised when the remote story engine cannot produce a safe player-facing reply."""
 
+
+def clean_ai_reply(text: str) -> str:
+    cleaned = text.strip()
+    while True:
+        for label in FORBIDDEN_DISPLAY_LABELS:
+            cleaned = cleaned.replace(label, "")
+        updated = re.sub(
+            r"^(?:\s*(?:[:：。.!！,，、;；]\s*|\s+))+",
+            "",
+            cleaned,
+        ).strip()
+        if updated == cleaned:
+            return cleaned
+        cleaned = updated
+
+
+def clean_display_speaker(speaker: str, kind: str) -> str:
+    cleaned = clean_ai_reply(speaker)
+    if cleaned:
+        return cleaned
+    if kind == "player":
+        return "柳书昂"
+    if kind == "narrator":
+        return "序章"
+    return "故事"
+
+
+def build_deepseek_messages(player_text: str) -> list[dict[str, str]]:
+    current_text = player_text.strip()
     recent = st.session_state.messages[-8:]
+    if recent and recent[-1].get("kind") == "player" and recent[-1].get("text") == current_text:
+        recent = recent[:-1]
+
     messages: list[dict[str, str]] = [{"role": "system", "content": system_prompt()}]
     for msg in recent:
-        role = "user" if msg["speaker"] == "柳书昂" else "assistant"
-        messages.append({"role": role, "content": f'{msg["speaker"]}: {msg["text"]}'})
-    messages.append({"role": "user", "content": f"柳书昂: {player_text}"})
+        if msg["kind"] == "player":
+            messages.append({"role": "user", "content": f'柳书昂：{msg["text"].strip()}'})
+        elif msg["kind"] == "ai":
+            messages.append({"role": "assistant", "content": clean_ai_reply(msg["text"])})
+        else:
+            messages.append({"role": "assistant", "content": msg["text"].strip()})
+    messages.append({"role": "user", "content": f"柳书昂：{current_text}"})
+    return messages
 
-    response = requests.post(
-        DEEPSEEK_URL,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": deepseek_model(),
-            "messages": messages,
-            "temperature": 0.88,
-            "max_tokens": 520,
-        },
-        timeout=60,
-    )
-    response.raise_for_status()
-    data: dict[str, Any] = response.json()
-    return data["choices"][0]["message"]["content"].strip(), "deepseek"
+
+def deepseek_generate(player_text: str) -> str:
+    api_key = deepseek_key()
+    if not api_key:
+        raise StoryGenerationError("missing DEEPSEEK_API_KEY")
+
+    try:
+        response = requests.post(
+            DEEPSEEK_URL,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": deepseek_model(),
+                "messages": build_deepseek_messages(player_text),
+                "temperature": 0.88,
+                "max_tokens": 520,
+                "stream": False,
+                "thinking": {"type": "disabled"},
+            },
+            timeout=60,
+        )
+        response.raise_for_status()
+        data: dict[str, Any] = response.json()
+        answer = data["choices"][0]["message"]["content"].strip()
+    except (requests.RequestException, KeyError, IndexError, TypeError, ValueError) as exc:
+        raise StoryGenerationError("remote generation failed") from exc
+    if not answer:
+        raise StoryGenerationError("empty generation")
+    return clean_ai_reply(answer)
 
 
 def has_lethal_intent(text: str) -> bool:
@@ -578,35 +711,6 @@ def maybe_emergency_event(player_text: str) -> str:
     return ""
 
 
-def offline_generate(player_text: str) -> str:
-    emergency = st.session_state.get("pending_emergency_event", "")
-    scene = random.choice(
-        [
-            "远处忽然掠过一束车灯，玻璃上映出几个人影。",
-            "会议室广播短促地响了一声，又像被人突然切断。",
-            "走廊尽头传来脚步声，节奏很轻，却每一步都停得刚刚好。",
-            "文件袋里露出半张收据，抬头正是赞助项目。",
-        ]
-    )
-    twist = random.choice(
-        [
-            "徐佳珍：（她把手机扣在胸口，眼神从小雨身上移到你脸上）柳书昂，你就这么相信她吗？",
-            "管家老张：（他往前半步，替你挡住罗经理投来的视线）少爷，罗经理手里的文件，恐怕不干净。",
-            "罗经理：（他笑意不达眼底，指尖敲着文件袋）柳同学，年轻人别把同情错当喜欢。",
-        ]
-    )
-    event_text = f"\n\n紧急事件：（{emergency}）" if emergency else ""
-    return (
-        f"{scene}\n\n"
-        f"柳书昂：（你向前一步，声音压得很稳）{player_text}\n\n"
-        f"{event_text}"
-        "小雨：（她抱紧书本，睫毛轻轻颤了一下，像是不敢立刻相信你）"
-        "柳书昂，你为什么……突然站在我这边？\n\n"
-        f"{twist}\n\n"
-        "小雨：（她终于抬头看你，眼底的防备松动了一点）如果你真的知道些什么，就别只说一半。"
-    )
-
-
 def queue_player_message(text: str) -> None:
     st.session_state.messages.append({"speaker": "柳书昂", "kind": "player", "text": text})
     st.session_state.pending_player_text = text
@@ -618,12 +722,12 @@ def complete_pending_response() -> None:
     if not text:
         return
     try:
-        answer, mode = deepseek_generate(text)
-    except Exception:
-        answer = offline_generate(text)
-        mode = "offline"
+        answer = deepseek_generate(text)
+    except StoryGenerationError:
+        answer = USER_NETWORK_ERROR
+    answer = clean_ai_reply(answer)
     st.session_state.messages.append(
-        {"speaker": "剧情引擎" if mode == "deepseek" else "离线引擎", "kind": "ai", "text": answer}
+        {"speaker": "故事", "kind": "ai", "text": answer}
     )
     st.session_state.pending_player_text = ""
     st.session_state.pending_emergency_event = ""
@@ -656,7 +760,30 @@ def memory_file_name() -> str:
     return f"xiaoyu-memory-{timestamp}.json"
 
 
+def sanitized_messages(messages: list[dict[str, str]]) -> list[dict[str, str]]:
+    cleaned_messages = []
+    for message in messages:
+        cleaned_message = dict(message)
+        cleaned_message["speaker"] = clean_display_speaker(
+            cleaned_message.get("speaker", ""),
+            cleaned_message.get("kind", ""),
+        )
+        if cleaned_message.get("kind") == "ai":
+            cleaned_message["text"] = clean_ai_reply(cleaned_message.get("text", ""))
+        cleaned_messages.append(cleaned_message)
+    return cleaned_messages
+
+
+def sanitize_story_state() -> None:
+    st.session_state.messages = sanitized_messages(st.session_state.messages)
+    st.session_state.memory_bank = [
+        clean_ai_reply(str(item)) for item in st.session_state.memory_bank if isinstance(item, str)
+    ][-12:]
+    st.session_state.active_memory = clean_ai_reply(str(st.session_state.active_memory))
+
+
 def build_memory_file() -> str:
+    sanitize_story_state()
     data = {
         "version": SAVE_VERSION,
         "title": APP_TITLE,
@@ -684,17 +811,17 @@ def restore_memory_file(uploaded_file: Any) -> tuple[bool, str]:
         if not all(isinstance(message.get(key), str) for key in ("speaker", "kind", "text")):
             return False, "记忆文件里的对话缺少必要字段。"
 
-    st.session_state.messages = messages
+    st.session_state.messages = sanitized_messages(messages)
     st.session_state.memory_bank = [
-        str(item) for item in data.get("memory_bank", []) if isinstance(item, str)
+        clean_ai_reply(str(item)) for item in data.get("memory_bank", []) if isinstance(item, str)
     ][-12:]
-    st.session_state.active_memory = str(data.get("active_memory", ""))
+    st.session_state.active_memory = clean_ai_reply(str(data.get("active_memory", "")))
     if data.get("appearance") in APPEARANCES:
         st.session_state.pending_restore_appearance = data["appearance"]
     st.session_state.pending_player_text = ""
     st.session_state.pending_emergency_event = ""
 
-    last_ai = next((m["text"] for m in reversed(messages) if m["kind"] == "ai"), "")
+    last_ai = next((m["text"] for m in reversed(st.session_state.messages) if m["kind"] == "ai"), "")
     if last_ai and not st.session_state.active_memory:
         st.session_state.active_memory = last_ai.split("\n")[0][:120]
     return True, "已唤醒这份记忆，可以继续上一次的回忆来游戏。"
@@ -709,7 +836,7 @@ def apply_pending_restore() -> None:
 def save_memory() -> None:
     recent_ai = [m["text"] for m in st.session_state.messages if m["kind"] == "ai"]
     if recent_ai:
-        snippet = recent_ai[-1].split("\n")[0][:80]
+        snippet = clean_ai_reply(recent_ai[-1]).split("\n")[0][:80]
         st.session_state.memory_bank.append(snippet)
 
 
@@ -738,7 +865,10 @@ def format_dialogue_html(text: str) -> str:
 
 
 def render_message(message: dict[str, str]) -> None:
+    message["speaker"] = clean_display_speaker(message["speaker"], message["kind"])
     speaker = html.escape(message["speaker"])
+    if message["kind"] == "ai":
+        message["text"] = clean_ai_reply(message["text"])
     text = format_dialogue_html(message["text"])
     st.markdown(
         f"""
@@ -794,10 +924,23 @@ def render_character_panel() -> None:
 
 
 def render_game_guide() -> None:
-    st.markdown(
-        """
-        <div class="guide-card">
-            <div class="guide-title">游戏指南</div>
+    with st.container(key="game_guide_panel"):
+        if st.session_state.guide_minimized:
+            st.markdown('<div class="guide-minimized"></div>', unsafe_allow_html=True)
+            if st.button("游戏指南", key="guide_expand", use_container_width=True):
+                st.session_state.guide_minimized = False
+                st.rerun()
+            return
+
+        title_col, action_col = st.columns([0.62, 0.38], gap="small")
+        with title_col:
+            st.markdown('<div class="guide-title">游戏指南</div>', unsafe_allow_html=True)
+        with action_col:
+            if st.button("收起", key="guide_minimize", use_container_width=True):
+                st.session_state.guide_minimized = True
+                st.rerun()
+        st.markdown(
+            """
             <ul class="guide-list">
                 <li>自由输入柳书昂的行动或对白。</li>
                 <li><span class="guide-emphasis">括号（）内</span>是心理活动、动作、表情和环境提示。</li>
@@ -806,10 +949,9 @@ def render_game_guide() -> None:
                 <li>刷新开场会清空当前记录。</li>
                 <li>剧情可能随机触发紧急事件。</li>
             </ul>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_memory_panel() -> None:
@@ -839,14 +981,17 @@ def render_memory_panel() -> None:
 
 
 def render_player_input() -> None:
-    with st.form("player_input", clear_on_submit=True):
-        text = st.text_area(
-            "柳书昂的行动或对白",
-            placeholder="柳书昂，请输入你的行动或对白...",
-            height=90,
-            label_visibility="collapsed",
-        )
-        submitted = st.form_submit_button("发送", use_container_width=True)
+    with st.container(key="fixed_player_input"):
+        if st.session_state.pending_player_text:
+            render_replying_indicator()
+        with st.form("player_input", clear_on_submit=True):
+            text = st.text_area(
+                "柳书昂的行动或对白",
+                placeholder="柳书昂，请输入你的行动或对白...",
+                height=90,
+                label_visibility="collapsed",
+            )
+            submitted = st.form_submit_button("发送", use_container_width=True)
     if submitted and text.strip():
         queue_player_message(text.strip())
         st.rerun()
@@ -898,6 +1043,7 @@ def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="✦", layout="wide")
     init_state()
     apply_pending_restore()
+    sanitize_story_state()
     css()
 
     st.title(APP_TITLE)
@@ -917,7 +1063,6 @@ def main() -> None:
 
         render_player_input()
         if st.session_state.pending_player_text:
-            render_replying_indicator()
             complete_pending_response()
             st.rerun()
     with guide_col:

@@ -1,6 +1,6 @@
 # 重生之我该如何选择
 
-一个类似 `oliversgame.streamlit.app` 的中文互动剧情游戏。界面使用 Streamlit，剧情生成优先调用 DeepSeek API；没有 API Key 时会自动使用内置离线剧情引擎，方便先试玩和改规则。
+一个类似 `oliversgame.streamlit.app` 的中文互动剧情游戏。界面使用 Streamlit，剧情生成调用 DeepSeek API；如果服务端没有配置 API Key，玩家页面会提示网络异常。
 
 ## 运行
 
@@ -17,7 +17,7 @@ streamlit run app.py
 
 ```bash
 export DEEPSEEK_API_KEY="你的 key"
-export DEEPSEEK_MODEL="deepseek-chat"
+export DEEPSEEK_MODEL="deepseek-v4-flash"
 streamlit run app.py
 ```
 
@@ -38,7 +38,7 @@ cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 
 ```toml
 DEEPSEEK_API_KEY = "你的 key"
-DEEPSEEK_MODEL = "deepseek-chat"
+DEEPSEEK_MODEL = "deepseek-v4-flash"
 ```
 
 5. 点击 Deploy，部署完成后会得到一个 `*.streamlit.app` 链接。
