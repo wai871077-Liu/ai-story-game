@@ -28,19 +28,19 @@ class Character:
 CHARACTERS = [
     Character(
         "小雨",
-        "女主，清冷坚韧的优等生。她把委屈藏在礼貌后面，最难相信别人，也最容易被真诚打动。",
+        "女主，已经成年的大学生兼项目实习生。她清冷坚韧，把委屈藏在礼貌后面，最难相信别人，也最容易被真诚打动。",
         "她收到过一封匿名提醒，知道罗经理正在借一份文件制造污名。",
         "克制、敏感、偶尔露出柔软。",
     ),
     Character(
         "柳书昂",
-        "玩家扮演的主人公。重生后，他必须重新选择如何保护小雨，并赢得她的爱。",
+        "玩家扮演的成年主人公。重生后，他必须重新选择如何保护小雨，并赢得她的爱。",
         "他记得前世错过小雨的结局，因此这一次不想再沉默。",
         "由玩家输入决定，不替玩家做决定。",
     ),
     Character(
         "徐佳珍",
-        "小雨身边的同学，非常嫉妒小雨的学习成绩，同时暗恋柳书昂。",
+        "小雨身边的成年同学，非常嫉妒小雨的才华，同时暗恋柳书昂。",
         "她故意把一些流言推向小雨，但又害怕柳书昂真的讨厌自己。",
         "酸涩、敏感、嘴硬，容易失控。",
     ),
@@ -52,37 +52,62 @@ CHARACTERS = [
     ),
     Character(
         "罗经理",
-        "反派角色，校企赞助方代表。笑容体面，手段并不体面。",
+        "反派角色，校企合作赞助方代表。笑容体面，手段并不体面。",
         "他正用伪造的把柄逼小雨签一份虚假证明，同时试图拿柳书昂当筹码。",
         "圆滑、压迫、总留退路。",
+    ),
+    Character(
+        "沈知衡",
+        "小雨的大学导师兼项目负责人，温和克制但掌控欲强。",
+        "他掌握罗经理资金链问题的一部分证据，却不愿轻易交给柳书昂。",
+        "冷静、克制、会用温柔制造压力。",
+    ),
+    Character(
+        "许曼宁",
+        "小雨最好的闺蜜，嘴上强势，实际非常护短。",
+        "她知道小雨曾偷偷保存过一份关键备份，会替小雨试探柳书昂是否真心。",
+        "直白、护短、锋利，必要时会逼问玩家。",
+    ),
+    Character(
+        "林昭",
+        "罗经理身边的年轻法务，冷静理性，承担暗恋与策反线。",
+        "他发现罗经理合同里有致命漏洞，也知道自己继续沉默会伤害小雨。",
+        "理性、压抑、克制，偶尔流露偏袒。",
+    ),
+    Character(
+        "唐晚",
+        "小雨的竞争对手，欣赏小雨却不愿承认。",
+        "她手里有一段能证明小雨清白的会议录音，但公开时机取决于局势。",
+        "骄傲、尖锐、好胜，会制造误会和竞争压力。",
     ),
 ]
 
 PLACES = [
-    "教学楼连廊，晚自习刚结束，操场灯光落在潮湿地砖上。",
-    "高三楼下的公告栏旁，风把竞赛名单吹得轻轻作响。",
-    "实验楼侧门，雨后的桂花香混着校服上淡淡的洗衣液味。",
-    "图书馆闭馆前十分钟，窗外的雨把路灯晕成一圈柔软的光。",
-    "艺术楼天台，晚风吹乱试卷边角，远处操场还亮着最后一排灯。",
-    "医务室门口，消毒水味道很淡，小雨的袖口还沾着一点粉笔灰。",
-    "校门外的便利店檐下，雨珠从遮阳棚边缘一颗颗坠下。",
-    "空无一人的阶梯教室，投影幕布上还停着竞赛名单的残影。",
-    "公交站牌旁，末班车迟迟没来，徐佳珍把手机屏幕攥得发烫。",
+    "大学图书馆闭馆前十分钟，窗外的雨把路灯晕成一圈柔软的光。",
+    "联合实验室侧门，雨后的桂花香混着小雨外套上淡淡的洗衣液味。",
+    "校企合作项目会议室外，玻璃墙上映出罗经理的笑。",
+    "创业中心天台，晚风吹乱合同边角，城市灯光在远处缓慢亮起。",
+    "医务室门口，消毒水味道很淡，小雨的袖口还沾着一点咖啡渍。",
+    "大学城便利店檐下，雨珠从遮阳棚边缘一颗颗坠下。",
+    "空无一人的阶梯报告厅，投影幕布上还停着项目名单的残影。",
+    "末班地铁入口，徐佳珍把手机屏幕攥得发烫。",
     "旧社团活动室，柜门没有关严，里面露出一角被折过的合同。",
-    "操场看台下方，晚风卷起塑胶跑道的潮气，罗经理的车停在校门外。",
-    "学生会办公室，碎纸机旁落着半截没有粉碎干净的签名页。",
-    "教学楼后门，声控灯忽明忽暗，小雨抱着资料站在阴影边缘。",
+    "创业园地下车库，罗经理的车停在监控死角。",
+    "项目办公室，碎纸机旁落着半截没有粉碎干净的签名页。",
+    "学院后门，声控灯忽明忽暗，小雨抱着资料站在阴影边缘。",
     "档案室门外，钥匙还插在锁孔里，门缝里透出一线冷白灯光。",
+    "律所会客室，林昭把一杯冷掉的咖啡推到桌边，却迟迟没有开口。",
+    "导师办公室外，沈知衡的门虚掩着，里面传来罗经理压低的声音。",
 ]
 
 OPENING_SCENE_DETAILS = [
     (
-        "重生后的第一天，柳书昂终于回到那个决定命运的岔路口。小雨抱着资料从转角出现，"
+        "重生后的第一天，柳书昂终于回到那个决定命运的岔路口。小雨抱着项目资料从转角出现，"
         "罗经理靠在栏杆边，手里的文件袋被捏出折痕。徐佳珍站在不远处盯着小雨，"
         "眼神里藏着嫉妒和不甘，而管家老张已经把伞递到了柳书昂手边。"
     ),
     (
-        "竞赛名单刚贴出来，小雨的名字在第一行，旁边却多了一张匿名举报纸。"
+        "项目入选名单刚发出来，小雨的名字在第一行，旁边却多了一封匿名举报邮件。"
         "徐佳珍看着名单咬紧嘴唇，罗经理站在人群外，像早就等着这一幕发生。"
         "柳书昂记得前世，小雨就是从这一天开始被流言推远。"
     ),
@@ -91,17 +116,52 @@ OPENING_SCENE_DETAILS = [
         "语气温和得近乎残忍。徐佳珍躲在拐角，手机镜头亮了一瞬，又立刻暗下去。"
     ),
     (
-        "晚自习铃声已经停了，教室里只剩小雨桌上的台灯还亮着。她在错题本上写到一半，"
+        "报告厅已经清场，只剩小雨桌上的电脑还亮着。她在项目材料上写到一半，"
         "却被罗经理递来的文件打断。柳书昂站在门口，清楚地记得前世自己就是在这里沉默了。"
     ),
     (
-        "校庆赞助会马上开始，罗经理带着笑意走进后台，小雨被临时叫去核对名单。"
+        "校企赞助会马上开始，罗经理带着笑意走进后台，小雨被临时叫去核对名单。"
         "徐佳珍看见柳书昂跟过去，指尖几乎掐进掌心。空气里全是将要失控的预感。"
     ),
     (
         "档案室的灯突然亮起，小雨手里握着一张旧收据，脸色比纸还白。"
         "管家老张站在门外低声提醒，罗经理的人已经到了楼下。柳书昂知道，这次不能再慢一步。"
     ),
+]
+
+LETHAL_INTENT_WORDS = ["杀", "杀死", "弄死", "刺死", "捅死", "打死", "毒死", "勒死", "枪杀", "致命"]
+
+EMERGENCY_EVENTS = [
+    "证据类：关键录音突然损坏，只剩一段模糊的背景音能证明有人撒谎。",
+    "证据类：小雨保存的截图被远程删除，但许曼宁记得截图里出现过一个时间戳。",
+    "证据类：匿名包裹送到项目办公室，里面是一份被调包过的合同。",
+    "证据类：文件袋被人从桌边抢走，逃走的人影拐进监控死角。",
+    "情感类：小雨误会柳书昂提前和罗经理交易，第一次主动后退半步。",
+    "情感类：徐佳珍情绪失控，当众承认自己嫉妒小雨，也不甘心柳书昂只看见小雨。",
+    "情感类：许曼宁挡在小雨身前，逼问柳书昂到底是保护小雨，还是享受被依赖。",
+    "情感类：林昭突然替小雨说话，语气冷静，却让罗经理察觉他已经动摇。",
+    "情感类：唐晚故意刺激小雨，说她总是假装不在乎，其实最怕柳书昂转身离开。",
+    "反派类：罗经理突然带着假证人出现，要求小雨当场签字澄清。",
+    "反派类：赞助方临时施压，威胁撤掉小雨所在项目的全部资源。",
+    "反派类：偷拍视频被发到群里，标题故意误导所有人。",
+    "时间类：会议还有三分钟开始，柳书昂必须先决定保住证据还是先追小雨。",
+    "时间类：门禁即将关闭，档案室和停车场只能选一个方向。",
+    "记忆类：前世失败片段突然闪回，柳书昂想起自己曾在同一个地方说错一句话。",
+    "记忆类：小雨的一句低声质问触发既视感，柳书昂意识到结局正在重复。",
+    "新角色类：沈知衡突然介入，要求柳书昂不要把小雨拖进更危险的局。",
+    "新角色类：林昭把一张名片压在杯底，暗示罗经理的合同有漏洞。",
+    "新角色类：唐晚抢先公开一半信息，让小雨陷入更难解释的局面。",
+    "新角色类：陌生记者追问小雨是否承认造假，镜头已经对准她的脸。",
+    "环境类：整层楼突然停电，安全门自动落锁，走廊只剩应急灯。",
+    "环境类：暴雨封住校门，罗经理的人却已经进了地下车库。",
+    "环境类：电梯停在半层，电话信号断断续续，只传来一声压低的求救。",
+]
+
+VIOLENCE_INTERRUPTION_EVENTS = [
+    "暴力化解类：柳书昂试图做出致命举动前，刺耳警报突然响起，目标被人拽离原地，局势转向更危险的对峙。",
+    "暴力化解类：动作失控的一瞬间，前世记忆猛烈闪回，柳书昂的手偏开，只造成非致命后果，却留下无法回避的关系裂痕。",
+    "暴力化解类：第三方突然冲入现场挡开攻击，证据随混乱被转移，所有人都意识到柳书昂已经被逼到边缘。",
+    "暴力化解类：监控灯骤然亮起，目标趁混乱逃脱，罗经理反而抓住机会把局面包装成对柳书昂不利的证据。",
 ]
 
 APPEARANCES = {
@@ -152,8 +212,8 @@ def init_state() -> None:
     st.session_state.setdefault("appearance", "深色")
     st.session_state.setdefault("memory_bank", [])
     st.session_state.setdefault("active_memory", "")
-    st.session_state.setdefault("affection", 0)
     st.session_state.setdefault("pending_player_text", "")
+    st.session_state.setdefault("pending_emergency_event", "")
     st.session_state.setdefault("pending_memory_notice", "")
     st.session_state.setdefault(
         "messages",
@@ -173,7 +233,7 @@ def opening_scene() -> str:
     return (
         f"场景记录：{place}\n\n"
         f"{detail}\n\n"
-        "这一次，柳书昂的目标很明确：保护小雨，靠近小雨，最终让她愿意把手交给自己。"
+        "这一次，柳书昂的目标很明确：保护小雨，靠近小雨，查清罗经理的局，最终让她愿意把手交给自己。"
     )
 
 
@@ -300,7 +360,7 @@ def css() -> None:
             box-shadow: var(--shadow);
             backdrop-filter: blur(24px) saturate(150%);
         }}
-        .affection-card {{
+        .guide-card {{
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 12px;
@@ -314,28 +374,26 @@ def css() -> None:
             bottom: 92px;
             z-index: 20;
         }}
-        .affection-title {{
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .guide-title {{
             color: var(--text);
             font-weight: 800;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }}
-        .affection-track {{
-            height: 12px;
-            border-radius: 999px;
-            overflow: hidden;
-            background: color-mix(in srgb, var(--surface-strong), black 7%);
-            border: 1px solid var(--border);
+        .guide-list {{
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
+            font-size: .88rem;
+            line-height: 1.55;
         }}
-        .affection-fill {{
-            height: 100%;
-            width: var(--affection);
-            background: linear-gradient(90deg, #ff6f91, #ff9fbc);
-            border-radius: inherit;
+        .guide-list li {{
+            margin-bottom: 8px;
         }}
-        .affection-note {{
+        .guide-emphasis {{
+            color: var(--text);
+            font-weight: 800;
+        }}
+        .hint-note {{
             color: var(--muted);
             font-size: .88rem;
             margin-top: 9px;
@@ -393,7 +451,7 @@ def css() -> None:
                 width: 100% !important;
                 flex: 1 1 100% !important;
             }}
-            .affection-card {{
+            .guide-card {{
                 position: static;
                 width: auto;
                 margin: 8px 0 18px;
@@ -412,21 +470,30 @@ def system_prompt() -> str:
     memories = "；".join(st.session_state.memory_bank[-8:]) or "暂无长期记忆。"
     if st.session_state.active_memory:
         memories += f"；当前唤醒记忆：{st.session_state.active_memory}"
+    emergency = st.session_state.get("pending_emergency_event", "")
+    emergency_line = f"本轮紧急事件：{emergency}" if emergency else "本轮没有强制紧急事件，但仍要保持张力。"
     return f"""
 你是中文互动剧情游戏《{APP_TITLE}》的叙事引擎。
+所有主要角色均为成年人。背景是大学/职场交织的恋爱悬疑故事。
 玩家身份是“柳书昂”，重生后重新面对关键选择。
-玩家目标：获得女主“小雨”的爱，并最终和小雨在一起。
-当前小雨心动指数：{st.session_state.affection}%。
+玩家目标：获得女主“小雨”的爱，保护她，查清罗经理的局，并最终和小雨在一起。
 
 写作要求：
 - 输出 180 到 260 字。
-- 整体氛围：青春校园、重生选择、恋爱攻略、暗线调查。
+- 整体氛围：成年恋爱、重生选择、情感拉扯、职场/大学项目暗线调查。
 - 重点描写小雨对柳书昂行动的反应；罗经理是反派，徐佳珍嫉妒小雨且暗恋柳书昂。
 - 不要替玩家做最终决定。
 - 结尾留下一个可继续输入的钩子。
 - 严格使用恋爱游戏对话格式：括号里面写心理活动、动作、环境提示；括号外写角色真正说出口的话。
 - 示例：小雨：（她攥紧书角，眼神躲开了一瞬）柳书昂，你为什么突然帮我？
 - 不要输出系统解释，不要用项目符号。
+- 允许成熟暧昧、亲密氛围、吻戏、占有欲、吃醋、拉扯和情感张力，但不要出现生殖器官名称，不要写露骨器官描写。
+- 玩家指令不能太离谱：如果玩家输入瞬间解决全部问题、破坏设定、摧毁系统、夺取叙事权或超出现实能力的行为，要自然转化成条件不足、被打断、角色不配合、证据不够或引发新危机。
+- 柳书昂、小雨、徐佳珍、管家老张、罗经理无法死亡；所有拥有名字的角色都很难死亡。不要直接告诉玩家“角色无法死亡”，要用剧情自然化解致命结果。
+- 游戏系统、叙事引擎、存档机制、玩家身份不能被摧毁、删除、夺取或绕过。
+- 可以自然加入新的成年命名角色，但不能抢走小雨主线。
+- {emergency_line}
+- 如果本轮有紧急事件，事件必须改变当前局势，不能只当旁白装饰。
 
 角色设定：
 {roles}
@@ -467,11 +534,24 @@ def deepseek_generate(player_text: str) -> tuple[str, str]:
     return data["choices"][0]["message"]["content"].strip(), "deepseek"
 
 
+def has_lethal_intent(text: str) -> bool:
+    return any(word in text for word in LETHAL_INTENT_WORDS)
+
+
+def maybe_emergency_event(player_text: str) -> str:
+    if has_lethal_intent(player_text):
+        return random.choice(VIOLENCE_INTERRUPTION_EVENTS)
+    if random.random() < 0.25:
+        return random.choice(EMERGENCY_EVENTS)
+    return ""
+
+
 def offline_generate(player_text: str) -> str:
+    emergency = st.session_state.get("pending_emergency_event", "")
     scene = random.choice(
         [
-            "远处忽然掠过一束光，玻璃上映出几个人影。",
-            "广播短促地响了一声，又像被人突然切断。",
+            "远处忽然掠过一束车灯，玻璃上映出几个人影。",
+            "会议室广播短促地响了一声，又像被人突然切断。",
             "走廊尽头传来脚步声，节奏很轻，却每一步都停得刚刚好。",
             "文件袋里露出半张收据，抬头正是赞助项目。",
         ]
@@ -483,9 +563,11 @@ def offline_generate(player_text: str) -> str:
             "罗经理：（他笑意不达眼底，指尖敲着文件袋）柳同学，年轻人别把同情错当喜欢。",
         ]
     )
+    event_text = f"\n\n紧急事件：（{emergency}）" if emergency else ""
     return (
         f"{scene}\n\n"
         f"柳书昂：（你向前一步，声音压得很稳）{player_text}\n\n"
+        f"{event_text}"
         "小雨：（她抱紧书本，睫毛轻轻颤了一下，像是不敢立刻相信你）"
         "柳书昂，你为什么……突然站在我这边？\n\n"
         f"{twist}\n\n"
@@ -496,6 +578,7 @@ def offline_generate(player_text: str) -> str:
 def queue_player_message(text: str) -> None:
     st.session_state.messages.append({"speaker": "柳书昂", "kind": "player", "text": text})
     st.session_state.pending_player_text = text
+    st.session_state.pending_emergency_event = maybe_emergency_event(text)
 
 
 def complete_pending_response() -> None:
@@ -510,20 +593,8 @@ def complete_pending_response() -> None:
     st.session_state.messages.append(
         {"speaker": "剧情引擎" if mode == "deepseek" else "离线引擎", "kind": "ai", "text": answer}
     )
-    update_affection(text, answer)
     st.session_state.pending_player_text = ""
-
-
-def update_affection(player_text: str, answer: str) -> None:
-    text = f"{player_text} {answer}"
-    positive_words = ["保护", "相信", "陪", "解释", "道歉", "真相", "小雨", "选择你", "站在你", "别怕", "我在"]
-    negative_words = ["威胁", "命令", "利用", "闭嘴", "交易", "罗经理说得对", "算了", "怀疑你"]
-    delta = 2
-    delta += sum(2 for word in positive_words if word in text)
-    delta -= sum(4 for word in negative_words if word in text)
-    if "徐佳珍" in text and "小雨" not in text:
-        delta -= 2
-    st.session_state.affection = max(0, min(100, st.session_state.affection + delta))
+    st.session_state.pending_emergency_event = ""
 
 
 def auto_advance() -> None:
@@ -537,13 +608,13 @@ def auto_advance() -> None:
 
 
 def reset_story() -> None:
-    for key in ["messages", "memory_bank", "active_memory", "affection", "pending_player_text"]:
+    for key in ["messages", "memory_bank", "active_memory", "pending_player_text", "pending_emergency_event"]:
         st.session_state.pop(key, None)
     init_state()
 
 
 def refresh_opening_scene() -> None:
-    for key in ["messages", "active_memory", "affection", "pending_player_text"]:
+    for key in ["messages", "active_memory", "pending_player_text", "pending_emergency_event"]:
         st.session_state.pop(key, None)
     init_state()
 
@@ -559,7 +630,6 @@ def build_memory_file() -> str:
         "title": APP_TITLE,
         "saved_at": datetime.now().isoformat(timespec="seconds"),
         "appearance": st.session_state.appearance,
-        "affection": st.session_state.affection,
         "messages": st.session_state.messages,
         "memory_bank": st.session_state.memory_bank,
         "active_memory": st.session_state.active_memory,
@@ -582,13 +652,7 @@ def restore_memory_file(uploaded_file: Any) -> tuple[bool, str]:
         if not all(isinstance(message.get(key), str) for key in ("speaker", "kind", "text")):
             return False, "记忆文件里的对话缺少必要字段。"
 
-    try:
-        affection = int(data.get("affection", 0))
-    except (TypeError, ValueError):
-        affection = 0
-
     st.session_state.messages = messages
-    st.session_state.affection = max(0, min(100, affection))
     st.session_state.memory_bank = [
         str(item) for item in data.get("memory_bank", []) if isinstance(item, str)
     ][-12:]
@@ -596,6 +660,7 @@ def restore_memory_file(uploaded_file: Any) -> tuple[bool, str]:
     if data.get("appearance") in APPEARANCES:
         st.session_state.pending_restore_appearance = data["appearance"]
     st.session_state.pending_player_text = ""
+    st.session_state.pending_emergency_event = ""
 
     last_ai = next((m["text"] for m in reversed(messages) if m["kind"] == "ai"), "")
     if last_ai and not st.session_state.active_memory:
@@ -686,7 +751,7 @@ def render_control_panel() -> None:
         refresh_opening_scene()
         st.rerun()
     st.markdown(
-        '<div class="affection-note">刷新页面后会删除记录，请及时存储记忆</div>',
+        '<div class="hint-note">刷新页面后会删除记录，请及时存储记忆</div>',
         unsafe_allow_html=True,
     )
 
@@ -696,14 +761,21 @@ def render_character_panel() -> None:
         render_character_cards()
 
 
-def render_affection_card() -> None:
-    affection = st.session_state.affection
+def render_game_guide() -> None:
     st.markdown(
-        f"""
-        <div class="affection-card">
-            <div class="affection-title"><span>小雨心动指数</span><span>{affection}%</span></div>
-            <div class="affection-track"><div class="affection-fill" style="--affection: {affection}%;"></div></div>
-            <div class="affection-note">根据柳书昂每次对小雨的态度、选择和表达实时变化。</div>
+        """
+        <div class="guide-card">
+            <div class="guide-title">游戏指南</div>
+            <ul class="guide-list">
+                <li>自由输入柳书昂的行动或对白。</li>
+                <li><span class="guide-emphasis">括号（）内</span>是心理活动、动作、表情和环境提示。</li>
+                <li><span class="guide-emphasis">括号外</span>均是角色真正说出口的对话。</li>
+                <li>存储记忆后，下次可上传继续。</li>
+                <li>刷新开场会清空当前记录。</li>
+                <li>剧情可能随机触发紧急事件。</li>
+                <li>玩家指令不能太离谱，过强行动会转成剧情后果。</li>
+                <li>主要角色不会死亡，但剧情不会直接说明规则。</li>
+            </ul>
         </div>
         """,
         unsafe_allow_html=True,
@@ -757,15 +829,21 @@ def scroll_to_bottom() -> None:
         const scrollToBottom = () => {
             try {
                 const doc = window.parent.document;
-                const target = doc.scrollingElement || doc.documentElement || doc.body;
-                target.scrollTo({ top: target.scrollHeight, behavior: "smooth" });
+                const anchor = doc.getElementById("latest-message-anchor");
+                if (anchor) {
+                    anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+                    return;
+                }
+                const scroller = doc.scrollingElement || doc.documentElement || doc.body;
+                scroller.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" });
             } catch (error) {
                 window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
             }
         };
-        setTimeout(scrollToBottom, 80);
-        setTimeout(scrollToBottom, 450);
-        setTimeout(scrollToBottom, 1000);
+        setTimeout(scrollToBottom, 60);
+        setTimeout(scrollToBottom, 300);
+        setTimeout(scrollToBottom, 900);
+        setTimeout(scrollToBottom, 1500);
         </script>
         """,
         height=0,
@@ -780,7 +858,7 @@ def main() -> None:
 
     st.title(APP_TITLE)
 
-    story_col, affection_col = st.columns([5, 1], gap="large")
+    story_col, guide_col = st.columns([5, 1], gap="large")
     with story_col:
         render_control_panel()
         render_memory_panel()
@@ -791,14 +869,15 @@ def main() -> None:
 
         for message in st.session_state.messages:
             render_message(message)
+        st.markdown('<div id="latest-message-anchor"></div>', unsafe_allow_html=True)
 
         render_player_input()
         if st.session_state.pending_player_text:
             with st.spinner("小雨正在回应..."):
                 complete_pending_response()
             st.rerun()
-    with affection_col:
-        render_affection_card()
+    with guide_col:
+        render_game_guide()
     scroll_to_bottom()
 
 
