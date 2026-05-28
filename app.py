@@ -9,6 +9,7 @@ from typing import Any
 
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 APP_TITLE = "重生之我该如何选择"
@@ -247,6 +248,11 @@ def css() -> None:
         f"""
         <style>
         :root {{
+            --page-width: 1400px;
+            --side-gap: 18px;
+            --guide-width: 260px;
+            --story-width: min(1080px, calc(100vw - var(--guide-width) - 4rem));
+            --story-left: max(1rem, calc((100vw - var(--page-width)) / 2 + var(--side-gap)));
             --app-bg: {appearance["app_bg"]};
             --surface: {appearance["surface"]};
             --surface-strong: {appearance["surface_strong"]};
@@ -278,9 +284,13 @@ def css() -> None:
             visibility: hidden !important;
         }}
         .block-container {{
-            max-width: 1280px;
+            max-width: var(--page-width);
             padding-top: 2rem;
             padding-bottom: 15rem;
+        }}
+        .st-key-story_shell {{
+            width: var(--story-width);
+            max-width: var(--story-width);
         }}
         h1 {{
             color: var(--text) !important;
@@ -386,9 +396,9 @@ def css() -> None:
             margin: 0;
             padding: 16px;
             position: fixed;
-            right: max(18px, calc((100vw - 1280px) / 2 + 18px));
+            right: max(var(--side-gap), calc((100vw - var(--page-width)) / 2 + var(--side-gap)));
             bottom: 210px;
-            width: 260px;
+            width: var(--guide-width);
             z-index: 9000;
         }}
         .st-key-game_guide_panel[data-testid="stVerticalBlock"],
@@ -414,11 +424,11 @@ def css() -> None:
         }}
         .st-key-fixed_player_input {{
             position: fixed;
-            left: max(1rem, calc((100vw - 1280px) / 2));
+            left: var(--story-left);
             bottom: 0;
             z-index: 9999;
             box-sizing: border-box;
-            width: min(930px, calc(100vw - 336px));
+            width: var(--story-width);
             padding: 16px 18px 18px;
             background: color-mix(in srgb, var(--surface-strong), transparent 3%);
             border: 1px solid var(--border);
@@ -537,10 +547,18 @@ def css() -> None:
             display: none;
         }}
         @media (max-width: 720px) {{
+            :root {{
+                --story-width: 100vw;
+                --story-left: 0;
+            }}
             .block-container {{
                 padding-left: 1rem;
                 padding-right: 1rem;
                 padding-bottom: 16.5rem;
+            }}
+            .st-key-story_shell {{
+                width: 100%;
+                max-width: 100%;
             }}
             [data-testid="column"] {{
                 width: 100% !important;
@@ -1012,30 +1030,37 @@ def render_replying_indicator() -> None:
 
 
 def scroll_to_bottom() -> None:
-    st.html(
+    components.html(
         """
         <script>
-        const scrollToBottom = () => {
+        const scrollToBottom = (behavior = "smooth") => {
             try {
                 const doc = window.parent.document;
                 const anchor = doc.getElementById("latest-message-anchor");
+                const input = doc.querySelector(".st-key-fixed_player_input");
+                const inputHeight = input ? input.getBoundingClientRect().height : 0;
                 if (anchor) {
-                    anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+                    const top = anchor.getBoundingClientRect().top + window.parent.scrollY;
+                    window.parent.scrollTo({
+                        top: Math.max(0, top - window.parent.innerHeight + inputHeight + 34),
+                        behavior,
+                    });
                     return;
                 }
                 const scroller = doc.scrollingElement || doc.documentElement || doc.body;
-                scroller.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" });
+                scroller.scrollTo({ top: scroller.scrollHeight, behavior });
             } catch (error) {
-                window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+                window.scrollTo({ top: document.body.scrollHeight, behavior });
             }
         };
-        setTimeout(scrollToBottom, 60);
-        setTimeout(scrollToBottom, 300);
-        setTimeout(scrollToBottom, 900);
-        setTimeout(scrollToBottom, 1500);
+        requestAnimationFrame(() => scrollToBottom("auto"));
+        setTimeout(() => scrollToBottom("auto"), 80);
+        setTimeout(() => scrollToBottom("smooth"), 260);
+        setTimeout(() => scrollToBottom("smooth"), 700);
+        setTimeout(() => scrollToBottom("smooth"), 1300);
         </script>
         """,
-        unsafe_allow_javascript=True,
+        height=0,
     )
 
 
@@ -1048,8 +1073,7 @@ def main() -> None:
 
     st.title(APP_TITLE)
 
-    story_col, guide_col = st.columns([5, 1], gap="large")
-    with story_col:
+    with st.container(key="story_shell"):
         render_control_panel()
         render_memory_panel()
         if st.session_state.pending_memory_notice:
@@ -1065,8 +1089,7 @@ def main() -> None:
         if st.session_state.pending_player_text:
             complete_pending_response()
             st.rerun()
-    with guide_col:
-        render_game_guide()
+    render_game_guide()
     scroll_to_bottom()
 
 
