@@ -9,7 +9,6 @@ from typing import Any
 
 import requests
 import streamlit as st
-import streamlit.components.v1 as components
 
 
 APP_TITLE = "重生之我该如何选择"
@@ -823,7 +822,7 @@ def render_player_input() -> None:
 
 
 def scroll_to_bottom() -> None:
-    components.html(
+    st.html(
         """
         <script>
         const scrollToBottom = () => {
@@ -846,7 +845,7 @@ def scroll_to_bottom() -> None:
         setTimeout(scrollToBottom, 1500);
         </script>
         """,
-        height=0,
+        unsafe_allow_javascript=True,
     )
 
 
