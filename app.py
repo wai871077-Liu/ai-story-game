@@ -1,8 +1,10 @@
 import html
+import json
 import os
 import random
 import re
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 import requests
@@ -11,6 +13,7 @@ import streamlit as st
 
 APP_TITLE = "重生之我该如何选择"
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
+SAVE_VERSION = 1
 
 
 @dataclass(frozen=True)
@@ -485,6 +488,60 @@ def reset_story() -> None:
     init_state()
 
 
+def memory_file_name() -> str:
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    return f"xiaoyu-memory-{timestamp}.json"
+
+
+def build_memory_file() -> str:
+    data = {
+        "version": SAVE_VERSION,
+        "title": APP_TITLE,
+        "saved_at": datetime.now().isoformat(timespec="seconds"),
+        "appearance": st.session_state.appearance,
+        "affection": st.session_state.affection,
+        "messages": st.session_state.messages,
+        "memory_bank": st.session_state.memory_bank,
+        "active_memory": st.session_state.active_memory,
+    }
+    return json.dumps(data, ensure_ascii=False, indent=2)
+
+
+def restore_memory_file(uploaded_file: Any) -> tuple[bool, str]:
+    try:
+        data = json.loads(uploaded_file.getvalue().decode("utf-8"))
+    except (AttributeError, UnicodeDecodeError, json.JSONDecodeError):
+        return False, "这个文件不是有效的记忆文件。"
+
+    messages = data.get("messages")
+    if not isinstance(messages, list) or not messages:
+        return False, "记忆文件里没有可恢复的对话记录。"
+    for message in messages:
+        if not isinstance(message, dict):
+            return False, "记忆文件里的对话格式不正确。"
+        if not all(isinstance(message.get(key), str) for key in ("speaker", "kind", "text")):
+            return False, "记忆文件里的对话缺少必要字段。"
+
+    try:
+        affection = int(data.get("affection", 0))
+    except (TypeError, ValueError):
+        affection = 0
+
+    st.session_state.messages = messages
+    st.session_state.affection = max(0, min(100, affection))
+    st.session_state.memory_bank = [
+        str(item) for item in data.get("memory_bank", []) if isinstance(item, str)
+    ][-12:]
+    st.session_state.active_memory = str(data.get("active_memory", ""))
+    if data.get("appearance") in APPEARANCES:
+        st.session_state.appearance = data["appearance"]
+
+    last_ai = next((m["text"] for m in reversed(messages) if m["kind"] == "ai"), "")
+    if last_ai and not st.session_state.active_memory:
+        st.session_state.active_memory = last_ai.split("\n")[0][:120]
+    return True, "已唤醒这份记忆，可以继续上一次的回忆来游戏。"
+
+
 def save_memory() -> None:
     recent_ai = [m["text"] for m in st.session_state.messages if m["kind"] == "ai"]
     if recent_ai:
@@ -572,6 +629,32 @@ def render_affection_card() -> None:
     )
 
 
+def render_memory_panel() -> None:
+    with st.expander("存储 / 唤醒记忆", expanded=True):
+        st.download_button(
+            "存储当前对话为记忆文件",
+            data=build_memory_file(),
+            file_name=memory_file_name(),
+            mime="application/json",
+            use_container_width=True,
+        )
+        uploaded_file = st.file_uploader(
+            "选择之前存储的记忆文件",
+            type=["json"],
+            accept_multiple_files=False,
+        )
+        if st.button("唤醒记忆并继续", use_container_width=True):
+            if uploaded_file is None:
+                st.warning("请先选择一个之前存储的记忆文件。")
+            else:
+                restored, message = restore_memory_file(uploaded_file)
+                if restored:
+                    st.success(message)
+                    st.rerun()
+                else:
+                    st.error(message)
+
+
 def render_player_input() -> None:
     with st.form("player_input", clear_on_submit=True):
         text = st.text_area(
@@ -596,6 +679,7 @@ def main() -> None:
     story_col, affection_col = st.columns([3, 1], gap="large")
     with story_col:
         render_control_panel()
+        render_memory_panel()
 
         for message in st.session_state.messages:
             render_message(message)
