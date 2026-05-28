@@ -61,6 +61,46 @@ PLACES = [
     "教学楼连廊，晚自习刚结束，操场灯光落在潮湿地砖上。",
     "高三楼下的公告栏旁，风把竞赛名单吹得轻轻作响。",
     "实验楼侧门，雨后的桂花香混着校服上淡淡的洗衣液味。",
+    "图书馆闭馆前十分钟，窗外的雨把路灯晕成一圈柔软的光。",
+    "艺术楼天台，晚风吹乱试卷边角，远处操场还亮着最后一排灯。",
+    "医务室门口，消毒水味道很淡，小雨的袖口还沾着一点粉笔灰。",
+    "校门外的便利店檐下，雨珠从遮阳棚边缘一颗颗坠下。",
+    "空无一人的阶梯教室，投影幕布上还停着竞赛名单的残影。",
+    "公交站牌旁，末班车迟迟没来，徐佳珍把手机屏幕攥得发烫。",
+    "旧社团活动室，柜门没有关严，里面露出一角被折过的合同。",
+    "操场看台下方，晚风卷起塑胶跑道的潮气，罗经理的车停在校门外。",
+    "学生会办公室，碎纸机旁落着半截没有粉碎干净的签名页。",
+    "教学楼后门，声控灯忽明忽暗，小雨抱着资料站在阴影边缘。",
+    "档案室门外，钥匙还插在锁孔里，门缝里透出一线冷白灯光。",
+]
+
+OPENING_SCENE_DETAILS = [
+    (
+        "重生后的第一天，柳书昂终于回到那个决定命运的岔路口。小雨抱着资料从转角出现，"
+        "罗经理靠在栏杆边，手里的文件袋被捏出折痕。徐佳珍站在不远处盯着小雨，"
+        "眼神里藏着嫉妒和不甘，而管家老张已经把伞递到了柳书昂手边。"
+    ),
+    (
+        "竞赛名单刚贴出来，小雨的名字在第一行，旁边却多了一张匿名举报纸。"
+        "徐佳珍看着名单咬紧嘴唇，罗经理站在人群外，像早就等着这一幕发生。"
+        "柳书昂记得前世，小雨就是从这一天开始被流言推远。"
+    ),
+    (
+        "雨声盖住了走廊尽头的争执。小雨低头整理湿掉的资料，罗经理把一份证明推到她面前，"
+        "语气温和得近乎残忍。徐佳珍躲在拐角，手机镜头亮了一瞬，又立刻暗下去。"
+    ),
+    (
+        "晚自习铃声已经停了，教室里只剩小雨桌上的台灯还亮着。她在错题本上写到一半，"
+        "却被罗经理递来的文件打断。柳书昂站在门口，清楚地记得前世自己就是在这里沉默了。"
+    ),
+    (
+        "校庆赞助会马上开始，罗经理带着笑意走进后台，小雨被临时叫去核对名单。"
+        "徐佳珍看见柳书昂跟过去，指尖几乎掐进掌心。空气里全是将要失控的预感。"
+    ),
+    (
+        "档案室的灯突然亮起，小雨手里握着一张旧收据，脸色比纸还白。"
+        "管家老张站在门外低声提醒，罗经理的人已经到了楼下。柳书昂知道，这次不能再慢一步。"
+    ),
 ]
 
 APPEARANCES = {
@@ -112,6 +152,8 @@ def init_state() -> None:
     st.session_state.setdefault("memory_bank", [])
     st.session_state.setdefault("active_memory", "")
     st.session_state.setdefault("affection", 0)
+    st.session_state.setdefault("pending_player_text", "")
+    st.session_state.setdefault("pending_memory_notice", "")
     st.session_state.setdefault(
         "messages",
         [
@@ -126,11 +168,10 @@ def init_state() -> None:
 
 def opening_scene() -> str:
     place = random.choice(PLACES)
+    detail = random.choice(OPENING_SCENE_DETAILS)
     return (
         f"场景记录：{place}\n\n"
-        "重生后的第一天，柳书昂终于回到那个决定命运的岔路口。小雨抱着资料从转角出现，"
-        "罗经理靠在栏杆边，手里的文件袋被捏出折痕。徐佳珍站在不远处盯着小雨，"
-        "眼神里藏着嫉妒和不甘，而管家老张已经把伞递到了柳书昂手边。\n\n"
+        f"{detail}\n\n"
         "这一次，柳书昂的目标很明确：保护小雨，靠近小雨，最终让她愿意把手交给自己。"
     )
 
@@ -173,7 +214,7 @@ def css() -> None:
             visibility: hidden !important;
         }}
         .block-container {{
-            max-width: 1080px;
+            max-width: 1280px;
             padding-top: 2rem;
             padding-bottom: 7rem;
         }}
@@ -190,7 +231,7 @@ def css() -> None:
             border-radius: 12px;
             box-shadow: var(--shadow);
             backdrop-filter: blur(22px) saturate(140%);
-            padding: 20px 24px;
+            padding: 22px 28px;
             margin: 14px 0;
         }}
         .dialogue-speaker {{
@@ -265,10 +306,12 @@ def css() -> None:
             padding: 18px;
             box-shadow: var(--shadow);
             backdrop-filter: blur(24px) saturate(150%);
-            margin: 8px 0 18px;
-            position: sticky;
-            top: 24px;
-            z-index: 3;
+            width: 260px;
+            margin: 0;
+            position: fixed;
+            right: max(18px, calc((100vw - 1280px) / 2 + 18px));
+            bottom: 92px;
+            z-index: 20;
         }}
         .affection-title {{
             display: flex;
@@ -351,6 +394,8 @@ def css() -> None:
             }}
             .affection-card {{
                 position: static;
+                width: auto;
+                margin: 8px 0 18px;
             }}
         }}
         </style>
@@ -447,8 +492,15 @@ def offline_generate(player_text: str) -> str:
     )
 
 
-def add_player_message(text: str) -> None:
+def queue_player_message(text: str) -> None:
     st.session_state.messages.append({"speaker": "柳书昂", "kind": "player", "text": text})
+    st.session_state.pending_player_text = text
+
+
+def complete_pending_response() -> None:
+    text = st.session_state.get("pending_player_text", "")
+    if not text:
+        return
     try:
         answer, mode = deepseek_generate(text)
     except Exception as exc:
@@ -458,6 +510,7 @@ def add_player_message(text: str) -> None:
         {"speaker": "剧情引擎" if mode == "deepseek" else "离线引擎", "kind": "ai", "text": answer}
     )
     update_affection(text, answer)
+    st.session_state.pending_player_text = ""
 
 
 def update_affection(player_text: str, answer: str) -> None:
@@ -479,11 +532,17 @@ def auto_advance() -> None:
         "我故意对罗经理笑了笑，问他是不是还有另一份合同。",
         "我把伞递给小雨，低声告诉她，这一次我会先选她。",
     ]
-    add_player_message(random.choice(prompts))
+    queue_player_message(random.choice(prompts))
 
 
 def reset_story() -> None:
-    for key in ["messages", "memory_bank", "active_memory", "affection"]:
+    for key in ["messages", "memory_bank", "active_memory", "affection", "pending_player_text"]:
+        st.session_state.pop(key, None)
+    init_state()
+
+
+def refresh_opening_scene() -> None:
+    for key in ["messages", "active_memory", "affection", "pending_player_text"]:
         st.session_state.pop(key, None)
     init_state()
 
@@ -534,12 +593,19 @@ def restore_memory_file(uploaded_file: Any) -> tuple[bool, str]:
     ][-12:]
     st.session_state.active_memory = str(data.get("active_memory", ""))
     if data.get("appearance") in APPEARANCES:
-        st.session_state.appearance = data["appearance"]
+        st.session_state.pending_restore_appearance = data["appearance"]
+    st.session_state.pending_player_text = ""
 
     last_ai = next((m["text"] for m in reversed(messages) if m["kind"] == "ai"), "")
     if last_ai and not st.session_state.active_memory:
         st.session_state.active_memory = last_ai.split("\n")[0][:120]
     return True, "已唤醒这份记忆，可以继续上一次的回忆来游戏。"
+
+
+def apply_pending_restore() -> None:
+    appearance = st.session_state.pop("pending_restore_appearance", "")
+    if appearance in APPEARANCES:
+        st.session_state.appearance = appearance
 
 
 def save_memory() -> None:
@@ -594,6 +660,8 @@ def render_character_cards() -> None:
             <div class="character-row">
                 <div class="character-name">{character.name}</div>
                 <div class="character-role">{character.role}</div>
+                <div class="character-role">秘密：{character.secret}</div>
+                <div class="character-role">表现：{character.style}</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -613,6 +681,14 @@ def render_control_panel() -> None:
         f'<span class="pill">当前外观：{st.session_state.appearance}</span>',
         unsafe_allow_html=True,
     )
+    if st.button("刷新开场剧情", use_container_width=True):
+        refresh_opening_scene()
+        st.rerun()
+
+
+def render_character_panel() -> None:
+    with st.expander("人物介绍", expanded=False):
+        render_character_cards()
 
 
 def render_affection_card() -> None:
@@ -649,7 +725,7 @@ def render_memory_panel() -> None:
             else:
                 restored, message = restore_memory_file(uploaded_file)
                 if restored:
-                    st.success(message)
+                    st.session_state.pending_memory_notice = message
                     st.rerun()
                 else:
                     st.error(message)
@@ -665,26 +741,35 @@ def render_player_input() -> None:
         )
         submitted = st.form_submit_button("发送", use_container_width=True)
     if submitted and text.strip():
-        add_player_message(text.strip())
+        queue_player_message(text.strip())
         st.rerun()
 
 
 def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="✦", layout="wide")
     init_state()
+    apply_pending_restore()
     css()
 
     st.title(APP_TITLE)
 
-    story_col, affection_col = st.columns([3, 1], gap="large")
+    story_col, affection_col = st.columns([5, 1], gap="large")
     with story_col:
         render_control_panel()
         render_memory_panel()
+        if st.session_state.pending_memory_notice:
+            st.success(st.session_state.pending_memory_notice)
+            st.session_state.pending_memory_notice = ""
+        render_character_panel()
 
         for message in st.session_state.messages:
             render_message(message)
 
         render_player_input()
+        if st.session_state.pending_player_text:
+            with st.spinner("小雨正在回应..."):
+                complete_pending_response()
+            st.rerun()
     with affection_col:
         render_affection_card()
 
