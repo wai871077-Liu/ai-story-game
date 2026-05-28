@@ -160,6 +160,10 @@ def css() -> None:
         [data-testid="stDecoration"],
         [data-testid="manage-app-button"],
         [data-testid="stStatusWidget"],
+        [data-testid="appCreatorAvatar"],
+        a:has([data-testid="appCreatorAvatar"]),
+        [class*="profileContainer"],
+        [class*="viewerBadge"],
         #MainMenu,
         footer {{
             display: none !important;
