@@ -9,6 +9,7 @@ from typing import Any
 
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 APP_TITLE = "重生之我该如何选择"
@@ -745,6 +746,28 @@ def render_player_input() -> None:
         st.rerun()
 
 
+def scroll_to_bottom() -> None:
+    components.html(
+        """
+        <script>
+        const scrollToBottom = () => {
+            try {
+                const doc = window.parent.document;
+                const target = doc.scrollingElement || doc.documentElement || doc.body;
+                target.scrollTo({ top: target.scrollHeight, behavior: "smooth" });
+            } catch (error) {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+            }
+        };
+        setTimeout(scrollToBottom, 80);
+        setTimeout(scrollToBottom, 450);
+        setTimeout(scrollToBottom, 1000);
+        </script>
+        """,
+        height=0,
+    )
+
+
 def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="✦", layout="wide")
     init_state()
@@ -772,6 +795,7 @@ def main() -> None:
             st.rerun()
     with affection_col:
         render_affection_card()
+    scroll_to_bottom()
 
 
 if __name__ == "__main__":
