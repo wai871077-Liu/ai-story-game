@@ -1,8 +1,8 @@
-import base64
+import html
 import os
 import random
+import re
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 import requests
@@ -11,7 +11,6 @@ import streamlit as st
 
 APP_TITLE = "重生之我该如何选择"
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
-ASSET_DIR = Path(__file__).parent / "assets"
 
 
 @dataclass(frozen=True)
@@ -19,84 +18,51 @@ class Character:
     name: str
     role: str
     secret: str
-    tone: str
-    avatar: str
+    style: str
 
 
 CHARACTERS = [
     Character(
         "小雨",
-        "清冷坚韧的奖学金生，习惯把委屈藏在礼貌后面。",
-        "她收到过一封匿名提醒，知道书吧储物柜里藏着关键录音。",
+        "女主，清冷坚韧的优等生。她把委屈藏在礼貌后面，最难相信别人，也最容易被真诚打动。",
+        "她收到过一封匿名提醒，知道罗经理正在借一份文件制造污名。",
         "克制、敏感、偶尔露出柔软。",
-        "xiaoyu.png",
     ),
     Character(
         "柳书昂",
-        "文气温和的学生会骨干，擅长把锋芒藏进一句轻描淡写里。",
-        "他看见过罗经理和学生会的人在雨夜交换文件袋。",
-        "含蓄、聪明、话里有话。",
-        "liu_shuang.png",
+        "玩家扮演的主人公。重生后，他必须重新选择如何保护小雨，并赢得她的爱。",
+        "他记得前世错过小雨的结局，因此这一次不想再沉默。",
+        "由玩家输入决定，不替玩家做决定。",
     ),
     Character(
         "徐佳珍",
-        "小雨的好友，急性子，常把担心藏在吐槽后面。",
-        "她手机里有一张模糊照片，拍到了真正的胁迫者。",
-        "直率、紧张、护短。",
-        "xu_jiazhen.png",
+        "小雨身边的同学，非常嫉妒小雨的学习成绩，同时暗恋柳书昂。",
+        "她故意把一些流言推向小雨，但又害怕柳书昂真的讨厌自己。",
+        "酸涩、敏感、嘴硬，容易失控。",
     ),
     Character(
         "管家老张",
-        "公子家里的旧人，沉稳周到，永远提前半步出现。",
+        "柳家旧人，沉稳周到，永远提前半步出现。",
         "他受过老爷嘱托，要查清校园赞助资金流向。",
         "礼貌、稳重、暗中保护。",
-        "lao_zhang.png",
     ),
     Character(
         "罗经理",
-        "校企赞助方代表，笑容体面，手段并不体面。",
-        "他正用代考把柄逼小雨签一份虚假证明。",
+        "反派角色，校企赞助方代表。笑容体面，手段并不体面。",
+        "他正用伪造的把柄逼小雨签一份虚假证明，同时试图拿柳书昂当筹码。",
         "圆滑、压迫、总留退路。",
-        "luo_manager.png",
     ),
 ]
 
-CHARACTER_BY_NAME = {character.name: character for character in CHARACTERS}
-
-SCENE_PRESETS = {
-    "高中校园": {
-        "asset": "scenes/high_school.png",
-        "places": [
-            "教学楼连廊，晚自习刚结束，操场灯光落在潮湿地砖上。",
-            "高三楼下的公告栏旁，风把竞赛名单吹得轻轻作响。",
-            "实验楼侧门，雨后的桂花香混着校服上淡淡的洗衣液味。",
-        ],
-        "mood": "青春、重生、校园选择、暗线调查",
-    },
-    "公司办公室": {
-        "asset": "scenes/office.png",
-        "places": [
-            "集团顶层会议室，城市夜景贴在玻璃幕墙外。",
-            "总裁办外的长廊，打印机吐出一份没有署名的合同。",
-            "深夜茶水间，咖啡机嗡鸣声盖住了远处压低的争执。",
-        ],
-        "mood": "职场、权力、利益博弈、暧昧试探",
-    },
-    "别墅": {
-        "asset": "scenes/villa.png",
-        "places": [
-            "雨夜别墅的玻璃花房，壁灯把玫瑰影子拉得很长。",
-            "二楼书房，檀木桌上压着一封没有寄出的信。",
-            "庭院回廊，远处车灯扫过湿亮的石阶。",
-        ],
-        "mood": "豪门、秘密、旧账、命运选择",
-    },
-}
+PLACES = [
+    "教学楼连廊，晚自习刚结束，操场灯光落在潮湿地砖上。",
+    "高三楼下的公告栏旁，风把竞赛名单吹得轻轻作响。",
+    "实验楼侧门，雨后的桂花香混着校服上淡淡的洗衣液味。",
+]
 
 APPEARANCES = {
     "深色": {
         "app_bg": "#070b14",
-        "scrim": "linear-gradient(rgba(4,8,18,.42), rgba(4,8,18,.78))",
         "surface": "rgba(20, 28, 44, .74)",
         "surface_strong": "rgba(18, 25, 40, .9)",
         "border": "rgba(255,255,255,.16)",
@@ -109,7 +75,6 @@ APPEARANCES = {
     },
     "浅色": {
         "app_bg": "#f5f7fb",
-        "scrim": "linear-gradient(rgba(246,248,252,.84), rgba(246,248,252,.94))",
         "surface": "rgba(255, 255, 255, .82)",
         "surface_strong": "rgba(255, 255, 255, .96)",
         "border": "rgba(20,31,48,.14)",
@@ -121,20 +86,6 @@ APPEARANCES = {
         "shadow": "0 24px 70px rgba(31,45,76,.18)",
     },
 }
-
-
-def image_data_uri(path: Path) -> str:
-    if not path.exists():
-        return ""
-    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
-    return f"data:image/png;base64,{encoded}"
-
-
-def avatar_uri(name: str) -> str:
-    character = CHARACTER_BY_NAME.get(name)
-    if not character:
-        return ""
-    return image_data_uri(ASSET_DIR / "avatars" / character.avatar)
 
 
 def deepseek_key() -> str:
@@ -155,10 +106,9 @@ def deepseek_model() -> str:
 
 def init_state() -> None:
     st.session_state.setdefault("appearance", "深色")
-    st.session_state.setdefault("scene", "高中校园")
-    st.session_state.setdefault("tone", "暧昧试探")
     st.session_state.setdefault("memory_bank", [])
     st.session_state.setdefault("active_memory", "")
+    st.session_state.setdefault("affection", 0)
     st.session_state.setdefault(
         "messages",
         [
@@ -172,22 +122,18 @@ def init_state() -> None:
 
 
 def opening_scene() -> str:
-    scene = st.session_state.get("scene", "高中校园")
-    place = random.choice(SCENE_PRESETS[scene]["places"])
+    place = random.choice(PLACES)
     return (
         f"场景记录：{place}\n\n"
-        "重生后的第一天，你终于回到那个决定命运的岔路口。小雨抱着资料从转角出现，"
-        "罗经理靠在栏杆边，手里的文件袋被捏出折痕。柳书昂站在阴影里没有说话，"
-        "徐佳珍一路小跑，而管家老张已经把伞递到了你的手边。\n\n"
-        "这一次，你知道每个人都藏着秘密，但你还不知道该相信谁。"
+        "重生后的第一天，柳书昂终于回到那个决定命运的岔路口。小雨抱着资料从转角出现，"
+        "罗经理靠在栏杆边，手里的文件袋被捏出折痕。徐佳珍站在不远处盯着小雨，"
+        "眼神里藏着嫉妒和不甘，而管家老张已经把伞递到了柳书昂手边。\n\n"
+        "这一次，柳书昂的目标很明确：保护小雨，靠近小雨，最终让她愿意把手交给自己。"
     )
 
 
 def css() -> None:
     appearance = APPEARANCES[st.session_state.appearance]
-    scene = SCENE_PRESETS[st.session_state.scene]
-    bg_uri = image_data_uri(ASSET_DIR / scene["asset"])
-    bg_layer = f"url('{bg_uri}') center / cover no-repeat fixed," if bg_uri else ""
 
     st.markdown(
         f"""
@@ -205,11 +151,19 @@ def css() -> None:
             --shadow: {appearance["shadow"]};
         }}
         .stApp {{
-            background:
-                {appearance["scrim"]},
-                {bg_layer}
-                var(--app-bg);
+            background: var(--app-bg);
             color: var(--text);
+        }}
+        header,
+        [data-testid="stHeader"],
+        [data-testid="stToolbar"],
+        [data-testid="stDecoration"],
+        [data-testid="manage-app-button"],
+        [data-testid="stStatusWidget"],
+        #MainMenu,
+        footer {{
+            display: none !important;
+            visibility: hidden !important;
         }}
         .block-container {{
             max-width: 1080px;
@@ -223,17 +177,36 @@ def css() -> None:
             line-height: 1.08 !important;
             text-shadow: 0 10px 34px rgba(0, 0, 0, .18);
         }}
-        [data-testid="stChatMessage"] {{
+        .dialogue-card {{
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 22px;
+            border-radius: 12px;
             box-shadow: var(--shadow);
             backdrop-filter: blur(22px) saturate(140%);
+            padding: 20px 24px;
+            margin: 14px 0;
         }}
-        [data-testid="stChatMessage"] p {{
+        .dialogue-speaker {{
+            color: var(--muted);
+            font-size: .86rem;
+            font-weight: 800;
+            margin-bottom: 9px;
+        }}
+        .dialogue-text {{
             color: var(--text);
             font-size: 1.02rem;
             line-height: 1.85;
+        }}
+        .dialogue-aside {{
+            color: var(--muted);
+            font-style: italic;
+        }}
+        .dialogue-line {{
+            display: block;
+            margin: 0 0 10px;
+        }}
+        .dialogue-line:last-child {{
+            margin-bottom: 0;
         }}
         .stButton > button {{
             min-height: 3rem;
@@ -254,13 +227,13 @@ def css() -> None:
             border: 1px solid var(--border);
             backdrop-filter: blur(18px) saturate(140%);
         }}
-        .stChatInput textarea {{
+        textarea {{
             border-radius: 20px;
             background: var(--input) !important;
             color: var(--text) !important;
             border: 1px solid var(--border);
         }}
-        .stChatInput textarea::placeholder {{
+        textarea::placeholder {{
             color: var(--muted) !important;
         }}
         .status {{
@@ -272,11 +245,47 @@ def css() -> None:
         .control-panel {{
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 24px;
+            border-radius: 12px;
             padding: 18px;
             margin: 8px 0 18px;
             box-shadow: var(--shadow);
             backdrop-filter: blur(24px) saturate(150%);
+        }}
+        .affection-card {{
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(24px) saturate(150%);
+            margin: 8px 0 18px;
+        }}
+        .affection-title {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+            font-weight: 800;
+            margin-bottom: 10px;
+        }}
+        .affection-track {{
+            height: 12px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: color-mix(in srgb, var(--surface-strong), black 7%);
+            border: 1px solid var(--border);
+        }}
+        .affection-fill {{
+            height: 100%;
+            width: var(--affection);
+            background: linear-gradient(90deg, #ff6f91, #ff9fbc);
+            border-radius: inherit;
+        }}
+        .affection-note {{
+            color: var(--muted);
+            font-size: .88rem;
+            margin-top: 9px;
+            line-height: 1.45;
         }}
         .section-title {{
             color: var(--muted);
@@ -298,21 +307,10 @@ def css() -> None:
             font-size: 13px;
         }}
         .character-row {{
-            display: grid;
-            grid-template-columns: 48px 1fr;
-            gap: 12px;
-            align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid var(--border);
         }}
         .character-row:last-child {{ border-bottom: none; }}
-        .character-row img {{
-            width: 48px;
-            height: 48px;
-            object-fit: cover;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-        }}
         .character-name {{
             font-weight: 800;
             color: var(--text);
@@ -325,6 +323,12 @@ def css() -> None:
         }}
         div[data-testid="stRadio"] label, div[data-testid="stSelectbox"] label {{
             color: var(--muted) !important;
+        }}
+        div[data-testid="stRadio"] p {{
+            color: var(--text) !important;
+        }}
+        div[data-testid="stRadio"] > label {{
+            display: none;
         }}
         @media (max-width: 720px) {{
             .block-container {{
@@ -344,24 +348,26 @@ def css() -> None:
 
 def system_prompt() -> str:
     roles = "\n".join(
-        f"- {c.name}: {c.role} 秘密: {c.secret} 语气: {c.tone}" for c in CHARACTERS
+        f"- {c.name}: {c.role} 秘密: {c.secret} 表现风格: {c.style}" for c in CHARACTERS
     )
     memories = "；".join(st.session_state.memory_bank[-8:]) or "暂无长期记忆。"
     if st.session_state.active_memory:
         memories += f"；当前唤醒记忆：{st.session_state.active_memory}"
-    scene = st.session_state.scene
     return f"""
 你是中文互动剧情游戏《{APP_TITLE}》的叙事引擎。
-玩家身份是“公子”，在重生后重新面对关键选择。
+玩家身份是“柳书昂”，重生后重新面对关键选择。
+玩家目标：获得女主“小雨”的爱，并最终和小雨在一起。
+当前小雨心动指数：{st.session_state.affection}%。
 
 写作要求：
 - 输出 180 到 260 字。
-- 当前场景类型：{scene}。氛围：{SCENE_PRESETS[scene]["mood"]}。
-- 每次至少让一个角色对玩家行动做出具体反应。
+- 整体氛围：青春校园、重生选择、恋爱攻略、暗线调查。
+- 重点描写小雨对柳书昂行动的反应；罗经理是反派，徐佳珍嫉妒小雨且暗恋柳书昂。
 - 不要替玩家做最终决定。
 - 结尾留下一个可继续输入的钩子。
-- 可含动作描写，但不要输出系统解释。
-- 当前叙事语气：{st.session_state.tone}
+- 严格使用恋爱游戏对话格式：括号里面写心理活动、动作、环境提示；括号外写角色真正说出口的话。
+- 示例：小雨：（她攥紧书角，眼神躲开了一瞬）柳书昂，你为什么突然帮我？
+- 不要输出系统解释，不要用项目符号。
 
 角色设定：
 {roles}
@@ -379,9 +385,9 @@ def deepseek_generate(player_text: str) -> tuple[str, str]:
     recent = st.session_state.messages[-8:]
     messages: list[dict[str, str]] = [{"role": "system", "content": system_prompt()}]
     for msg in recent:
-        role = "assistant" if msg["speaker"] != "公子" else "user"
+        role = "user" if msg["speaker"] == "柳书昂" else "assistant"
         messages.append({"role": role, "content": f'{msg["speaker"]}: {msg["text"]}'})
-    messages.append({"role": "user", "content": f"公子: {player_text}"})
+    messages.append({"role": "user", "content": f"柳书昂: {player_text}"})
 
     response = requests.post(
         DEEPSEEK_URL,
@@ -403,7 +409,6 @@ def deepseek_generate(player_text: str) -> tuple[str, str]:
 
 
 def offline_generate(player_text: str) -> str:
-    focus = random.choice(CHARACTERS)
     scene = random.choice(
         [
             "远处忽然掠过一束光，玻璃上映出几个人影。",
@@ -412,30 +417,25 @@ def offline_generate(player_text: str) -> str:
             "文件袋里露出半张收据，抬头正是赞助项目。",
         ]
     )
-    reactions = [
-        f"{focus.name}听完你的话，眼神明显停了一下。这个名字像被风吹过水面，露出一点藏不住的波纹。",
-        f"{focus.name}抬头看你，像是在判断这句话里有几分真心，又有几分试探。",
-        f"{focus.name}轻轻吸了口气，声音压低：公子，你现在插手，就等于告诉他们你已经知道了。",
-    ]
     twist = random.choice(
         [
-            "徐佳珍忽然把手机屏幕扣在胸口，屏幕上似乎是一张模糊照片。",
-            "管家老张往前半步，替你挡住了罗经理投来的视线。",
-            "柳书昂袖口露出一截折起的名单，像早就等着你发现。",
-            "小雨的耳尖微红，却没有后退，像终于等到有人站到她这边。",
+            "徐佳珍：（她把手机扣在胸口，眼神从小雨身上移到你脸上）柳书昂，你就这么相信她吗？",
+            "管家老张：（他往前半步，替你挡住罗经理投来的视线）少爷，罗经理手里的文件，恐怕不干净。",
+            "罗经理：（他笑意不达眼底，指尖敲着文件袋）柳同学，年轻人别把同情错当喜欢。",
         ]
     )
     return (
         f"{scene}\n\n"
-        f"你说：“{player_text}”\n\n"
-        f"{random.choice(reactions)} {twist} 罗经理笑了笑，指尖敲着文件袋："
-        "既然公子也在，不如一起听听这份证明该怎么写。\n\n"
-        "空气安静下来，所有人的目光都落在你身上。"
+        f"柳书昂：（你向前一步，声音压得很稳）{player_text}\n\n"
+        "小雨：（她抱紧书本，睫毛轻轻颤了一下，像是不敢立刻相信你）"
+        "柳书昂，你为什么……突然站在我这边？\n\n"
+        f"{twist}\n\n"
+        "小雨：（她终于抬头看你，眼底的防备松动了一点）如果你真的知道些什么，就别只说一半。"
     )
 
 
 def add_player_message(text: str) -> None:
-    st.session_state.messages.append({"speaker": "公子", "kind": "player", "text": text})
+    st.session_state.messages.append({"speaker": "柳书昂", "kind": "player", "text": text})
     try:
         answer, mode = deepseek_generate(text)
     except Exception as exc:
@@ -444,12 +444,25 @@ def add_player_message(text: str) -> None:
     st.session_state.messages.append(
         {"speaker": "剧情引擎" if mode == "deepseek" else "离线引擎", "kind": "ai", "text": answer}
     )
+    update_affection(text, answer)
+
+
+def update_affection(player_text: str, answer: str) -> None:
+    text = f"{player_text} {answer}"
+    positive_words = ["保护", "相信", "陪", "解释", "道歉", "真相", "小雨", "选择你", "站在你", "别怕", "我在"]
+    negative_words = ["威胁", "命令", "利用", "闭嘴", "交易", "罗经理说得对", "算了", "怀疑你"]
+    delta = 2
+    delta += sum(2 for word in positive_words if word in text)
+    delta -= sum(4 for word in negative_words if word in text)
+    if "徐佳珍" in text and "小雨" not in text:
+        delta -= 2
+    st.session_state.affection = max(0, min(100, st.session_state.affection + delta))
 
 
 def auto_advance() -> None:
     prompts = [
         "我看向小雨，示意她先别急，把今晚看到的一切从头说。",
-        "我让老张去查文件袋来源，同时请柳书昂留下来作证。",
+        "我让老张去查文件袋来源，同时请小雨先相信我一次。",
         "我故意对罗经理笑了笑，问他是不是还有另一份合同。",
         "我把伞递给小雨，低声告诉她，这一次我会先选她。",
     ]
@@ -457,7 +470,7 @@ def auto_advance() -> None:
 
 
 def reset_story() -> None:
-    for key in ["messages", "memory_bank", "active_memory"]:
+    for key in ["messages", "memory_bank", "active_memory", "affection"]:
         st.session_state.pop(key, None)
     init_state()
 
@@ -476,31 +489,44 @@ def awaken_memory() -> None:
         seeds = [
             "你记得前世的雨夜里，小雨没有等到解释的机会。",
             "你记得罗经理的文件袋里不只有合同，还有一张被折过的照片。",
-            "你记得柳书昂曾在最后一刻提醒你：真正的证据不在明处。",
+            "你记得徐佳珍曾经哭着说：为什么你眼里永远只有小雨。",
         ]
         st.session_state.active_memory = random.choice(seeds)
         st.session_state.memory_bank.append(st.session_state.active_memory)
 
 
+def format_dialogue_html(text: str) -> str:
+    escaped = html.escape(text)
+    escaped = re.sub(r"（([^（）]+)）", r'<span class="dialogue-aside">（\1）</span>', escaped)
+    lines = escaped.splitlines()
+    rendered_lines = [
+        f'<span class="dialogue-line">{line}</span>' if line else '<span class="dialogue-line"></span>'
+        for line in lines
+    ]
+    return "".join(rendered_lines)
+
+
 def render_message(message: dict[str, str]) -> None:
-    avatar = avatar_uri(message["speaker"]) or {"narrator": "🧭", "player": "🎭", "ai": "✦"}.get(
-        message["kind"], "💬"
+    speaker = html.escape(message["speaker"])
+    text = format_dialogue_html(message["text"])
+    st.markdown(
+        f"""
+        <div class="dialogue-card">
+            <div class="dialogue-speaker">{speaker}</div>
+            <div class="dialogue-text">{text}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
-    with st.chat_message(message["speaker"], avatar=avatar):
-        st.markdown(message["text"])
 
 
 def render_character_cards() -> None:
     for character in CHARACTERS:
-        uri = image_data_uri(ASSET_DIR / "avatars" / character.avatar)
         st.markdown(
             f"""
             <div class="character-row">
-                <img src="{uri}" alt="{character.name}">
-                <div>
-                    <div class="character-name">{character.name}</div>
-                    <div class="character-role">{character.role}</div>
-                </div>
+                <div class="character-name">{character.name}</div>
+                <div class="character-role">{character.role}</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -508,30 +534,46 @@ def render_character_cards() -> None:
 
 
 def render_control_panel() -> None:
-    st.markdown('<div class="control-panel">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">外观与场景</div>', unsafe_allow_html=True)
-    scene_col, appearance_col, tone_col = st.columns([1.2, 1, 1.1])
-    with scene_col:
-        st.session_state.scene = st.segmented_control(
-            "画面背景",
-            list(SCENE_PRESETS),
-            selection_mode="single",
-            default=st.session_state.scene,
+    st.markdown('<div class="section-title">外观</div>', unsafe_allow_html=True)
+    st.radio(
+        "外观",
+        ["深色", "浅色"],
+        key="appearance",
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+    st.markdown(
+        f'<span class="pill">当前外观：{st.session_state.appearance}</span>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_affection_card() -> None:
+    affection = st.session_state.affection
+    st.markdown(
+        f"""
+        <div class="affection-card">
+            <div class="affection-title"><span>小雨心动指数</span><span>{affection}%</span></div>
+            <div class="affection-track"><div class="affection-fill" style="--affection: {affection}%;"></div></div>
+            <div class="affection-note">根据柳书昂每次对小雨的态度、选择和表达实时变化。</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_player_input() -> None:
+    with st.form("player_input", clear_on_submit=True):
+        text = st.text_area(
+            "柳书昂的行动或对白",
+            placeholder="柳书昂，请输入你的行动或对白...",
+            height=90,
+            label_visibility="collapsed",
         )
-    with appearance_col:
-        st.session_state.appearance = st.segmented_control(
-            "外观",
-            ["深色", "浅色"],
-            selection_mode="single",
-            default=st.session_state.appearance,
-        )
-    with tone_col:
-        st.session_state.tone = st.selectbox(
-            "叙事语气",
-            ["暧昧试探", "悬疑推进", "温柔守护", "强势摊牌"],
-            index=["暧昧试探", "悬疑推进", "温柔守护", "强势摊牌"].index(st.session_state.tone),
-        )
-    st.markdown("</div>", unsafe_allow_html=True)
+        submitted = st.form_submit_button("发送", use_container_width=True)
+    if submitted and text.strip():
+        add_player_message(text.strip())
+        st.rerun()
 
 
 def main() -> None:
@@ -540,13 +582,12 @@ def main() -> None:
     css()
 
     st.title(APP_TITLE)
-    engine = "DeepSeek 在线" if deepseek_key() else "离线剧情引擎"
-    st.markdown(
-        f'<div class="status">当前引擎：{engine} · 场景：{st.session_state.scene} · 外观：{st.session_state.appearance}</div>',
-        unsafe_allow_html=True,
-    )
 
-    render_control_panel()
+    top_left, top_right = st.columns([2.3, 1])
+    with top_left:
+        render_control_panel()
+    with top_right:
+        render_affection_card()
 
     for message in st.session_state.messages:
         render_message(message)
@@ -582,10 +623,7 @@ def main() -> None:
         with st.expander("📜 角色背景"):
             render_character_cards()
 
-    prompt = st.chat_input("公子，请指示...")
-    if prompt:
-        add_player_message(prompt)
-        st.rerun()
+    render_player_input()
 
 
 if __name__ == "__main__":
