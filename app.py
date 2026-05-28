@@ -685,6 +685,10 @@ def render_control_panel() -> None:
     if st.button("刷新开场剧情", use_container_width=True):
         refresh_opening_scene()
         st.rerun()
+    st.markdown(
+        '<div class="affection-note">刷新页面后会删除记录，请及时存储记忆</div>',
+        unsafe_allow_html=True,
+    )
 
 
 def render_character_panel() -> None:
