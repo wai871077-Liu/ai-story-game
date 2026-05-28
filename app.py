@@ -398,6 +398,39 @@ def css() -> None:
             margin-top: 9px;
             line-height: 1.45;
         }}
+        .replying-indicator {{
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--muted);
+            font-size: .96rem;
+            font-weight: 700;
+            padding: 12px 4px;
+        }}
+        .replying-dot {{
+            width: 5px;
+            height: 5px;
+            border-radius: 999px;
+            background: var(--accent);
+            opacity: .35;
+            animation: reply-bounce 1s infinite ease-in-out;
+        }}
+        .replying-dot:nth-child(2) {{
+            animation-delay: .15s;
+        }}
+        .replying-dot:nth-child(3) {{
+            animation-delay: .3s;
+        }}
+        @keyframes reply-bounce {{
+            0%, 80%, 100% {{
+                transform: translateY(0);
+                opacity: .35;
+            }}
+            40% {{
+                transform: translateY(-5px);
+                opacity: 1;
+            }}
+        }}
         .section-title {{
             color: var(--muted);
             font-size: .78rem;
@@ -819,6 +852,20 @@ def render_player_input() -> None:
         st.rerun()
 
 
+def render_replying_indicator() -> None:
+    st.markdown(
+        """
+        <div class="replying-indicator">
+            <span>正在回复</span>
+            <span class="replying-dot"></span>
+            <span class="replying-dot"></span>
+            <span class="replying-dot"></span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def scroll_to_bottom() -> None:
     st.html(
         """
@@ -870,8 +917,8 @@ def main() -> None:
 
         render_player_input()
         if st.session_state.pending_player_text:
-            with st.spinner("（正在回复...）"):
-                complete_pending_response()
+            render_replying_indicator()
+            complete_pending_response()
             st.rerun()
     with guide_col:
         render_game_guide()
