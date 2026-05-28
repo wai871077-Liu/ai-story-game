@@ -596,37 +596,6 @@ def main() -> None:
     for message in st.session_state.messages:
         render_message(message)
 
-    left, mid, mem, role = st.columns([1.0, 1.15, 1.5, 1.45])
-    with left:
-        if st.button("✦ 新剧情", use_container_width=True):
-            reset_story()
-            st.rerun()
-    with mid:
-        if st.button("🤖 自动推进剧情", use_container_width=True):
-            auto_advance()
-            st.rerun()
-    with mem:
-        with st.expander("💾 封存 / 唤醒记忆"):
-            a, b = st.columns(2)
-            with a:
-                if st.button("封存最近一幕", use_container_width=True):
-                    save_memory()
-                    st.rerun()
-            with b:
-                if st.button("唤醒记忆", use_container_width=True):
-                    awaken_memory()
-                    st.rerun()
-            if st.session_state.active_memory:
-                st.markdown(f'<span class="pill">已唤醒：{st.session_state.active_memory}</span>', unsafe_allow_html=True)
-            if st.session_state.memory_bank:
-                for item in st.session_state.memory_bank[-8:]:
-                    st.markdown(f'<span class="pill">{item}</span>', unsafe_allow_html=True)
-            else:
-                st.caption("还没有文件也可以唤醒，系统会先生成一条前世记忆。")
-    with role:
-        with st.expander("📜 角色背景"):
-            render_character_cards()
-
     render_player_input()
 
 
