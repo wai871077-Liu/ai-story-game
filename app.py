@@ -263,6 +263,9 @@ def css() -> None:
             box-shadow: var(--shadow);
             backdrop-filter: blur(24px) saturate(150%);
             margin: 8px 0 18px;
+            position: sticky;
+            top: 24px;
+            z-index: 3;
         }}
         .affection-title {{
             display: flex;
@@ -342,6 +345,9 @@ def css() -> None:
             [data-testid="column"] {{
                 width: 100% !important;
                 flex: 1 1 100% !important;
+            }}
+            .affection-card {{
+                position: static;
             }}
         }}
         </style>
@@ -587,16 +593,16 @@ def main() -> None:
 
     st.title(APP_TITLE)
 
-    top_left, top_right = st.columns([2.3, 1])
-    with top_left:
+    story_col, affection_col = st.columns([3, 1], gap="large")
+    with story_col:
         render_control_panel()
-    with top_right:
+
+        for message in st.session_state.messages:
+            render_message(message)
+
+        render_player_input()
+    with affection_col:
         render_affection_card()
-
-    for message in st.session_state.messages:
-        render_message(message)
-
-    render_player_input()
 
 
 if __name__ == "__main__":
