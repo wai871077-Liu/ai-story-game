@@ -526,7 +526,7 @@ def deepseek_generate(player_text: str) -> tuple[str, str]:
             "temperature": 0.88,
             "max_tokens": 520,
         },
-        timeout=45,
+        timeout=60,
     )
     response.raise_for_status()
     data: dict[str, Any] = response.json()
@@ -586,8 +586,8 @@ def complete_pending_response() -> None:
         return
     try:
         answer, mode = deepseek_generate(text)
-    except Exception as exc:
-        answer = offline_generate(text) + f"\n\n（DeepSeek 调用失败，已切换离线剧情：{exc}）"
+    except Exception:
+        answer = offline_generate(text)
         mode = "offline"
     st.session_state.messages.append(
         {"speaker": "剧情引擎" if mode == "deepseek" else "离线引擎", "kind": "ai", "text": answer}
@@ -870,7 +870,7 @@ def main() -> None:
 
         render_player_input()
         if st.session_state.pending_player_text:
-            with st.spinner("小雨正在回应..."):
+            with st.spinner("（正在回复...）"):
                 complete_pending_response()
             st.rerun()
     with guide_col:
